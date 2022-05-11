@@ -62,37 +62,42 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import train_test_split
 
-# Load the data, and separate the target
-data_path = path + "\\data\\Stocks\\a.us.txt"
-# data_path = path + "\\a.us copy_reformatted.txt"
+def get_data(path):
+    # Load the data, and separate the target
+    data_path = path
+    # data_path = path + "\\a.us copy_reformatted.txt"
 
-data_path = reformat_file(data_path, BACK_COUNT)
+    data_path = reformat_file(data_path, BACK_COUNT)
 
-pd.options.display.max_columns = None
-pd.options.display.max_rows = None
+    pd.options.display.max_columns = None
+    pd.options.display.max_rows = None
 
-stocks_data = pd.read_csv(data_path)
-print(stocks_data.head())
-y = stocks_data.Close
+    stocks_data = pd.read_csv(data_path)
+    print(stocks_data.head())
+    y = stocks_data.Close
 
-# Create X (After completing the exercise, you can return to modify this line!)
-features = ["Open", "High", "Low", "Volume"]
+    # Create X (After completing the exercise, you can return to modify this line!)
+    features = ["Open", "High", "Low", "Volume"]
 
-backCount = BACK_COUNT
+    backCount = BACK_COUNT
 
-newFeatures = []
-for f in features:
-    newFeatures.append(f)
-    
-for i in range(1, backCount+1):
+    newFeatures = []
     for f in features:
-        newFeatures.append(str(i) + "_" + f)
+        newFeatures.append(f)
+        
+    for i in range(1, backCount+1):
+        for f in features:
+            newFeatures.append(str(i) + "_" + f)
 
-features = newFeatures
+    features = newFeatures
 
-# Select columns corresponding to features, and preview the data
-X = stocks_data[features]
-X.head()
+    # Select columns corresponding to features, and preview the data
+    X = stocks_data[features]
+    # X.head()
+    
+    return X, y, stocks_data
+
+X, y, stocks_data = get_data(path + "\\data\\Stocks\\a.us.txt")
 
 # Split into validation and training data
 train_X, val_X, train_y, val_y = train_test_split(X, y, random_state=1) #, test_size=0.8)
@@ -103,24 +108,64 @@ rf_model.fit(train_X, train_y)
 rf_val_predictions = rf_model.predict(val_X)
 rf_val_mae = mean_absolute_error(rf_val_predictions, val_y)
 
-print("Validation MAE for Random Forest Model: {:,.0f}".format(rf_val_mae))
-print(val_X.head())
-print(val_y.head())
-print(stocks_data.head())
+print("Validation MAE for Random Forest Model: {:,.3f}".format(rf_val_mae))
+# print(val_X.head())
+# print(val_y.head())
+# print(stocks_data.head())
 
 plt.figure(figsize=(10,10))
-plt.scatter(val_y, rf_val_predictions, c='crimson')
-plt.yscale('log')
-plt.xscale('log')
+# plt.scatter(val_y, rf_val_predictions, c='crimson')
+# plt.yscale('log')
+# plt.xscale('log')
 
 p1 = max(max(rf_val_predictions), max(val_y))
 p2 = min(min(rf_val_predictions), min(val_y))
-plt.plot([p1, p2], [p1, p2], 'b-')
+# plt.plot([p1, p2], [p1, p2], 'b-')
+plt.scatter(range(len(val_X)), val_y)
+plt.plot(range(len(val_X)), val_y)
+plt.scatter(range(len(val_X)), rf_val_predictions, c='crimson')
+plt.plot(range(len(val_X)), rf_val_predictions, c='crimson')
 plt.xlabel('True Values', fontsize=15)
 plt.ylabel('Predictions', fontsize=15)
 plt.axis('equal')
 plt.show()
 
-# plt.plot()
-# plt.show()
+input("Press ENTER to continue")
+print("Continuing to next part...")
+
+X, y, stocks_data = get_data(path + "\\data\\Stocks\\zumz.us.txt")
+
+# Split into validation and training data
+# train_X, val_X, train_y, val_y = train_test_split(X, y, random_state=1) #, test_size=0.8)
+
+val_X = X
+val_y = y
+
+rf_val_predictions = rf_model.predict(val_X)
+rf_val_mae = mean_absolute_error(rf_val_predictions, val_y)
+
+print("MAE: " + str(rf_val_mae))
+
+print("Validation MAE for Random Forest Model: {:,.3f}".format(rf_val_mae))
+# print(val_X.head())
+# print(val_y.head())
+# print(stocks_data.head())
+
+plt.figure(figsize=(10,10))
+# plt.scatter(val_y, rf_val_predictions, c='crimson')
+# plt.yscale('log')
+# plt.xscale('log')
+
+p1 = max(max(rf_val_predictions), max(val_y))
+p2 = min(min(rf_val_predictions), min(val_y))
+# plt.plot([p1, p2], [p1, p2], 'b-')
+plt.scatter(range(len(val_X)), val_y)
+plt.plot(range(len(val_X)), val_y)
+plt.scatter(range(len(val_X)), rf_val_predictions, c='crimson')
+plt.plot(range(len(val_X)), rf_val_predictions, c='crimson')
+plt.xlabel('True Values', fontsize=15)
+plt.ylabel('Predictions', fontsize=15)
+plt.axis('equal')
+plt.show()
+
 input("Press ENTER to exit")
